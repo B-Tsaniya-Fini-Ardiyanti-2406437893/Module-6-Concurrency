@@ -17,3 +17,12 @@ Penambahan kuncinya adalah `fs::read_to_string("hello.html")`, yang membaca selu
 Respons HTTP dibuat menggunakan makro `format!`, menggabungkan tiga bagian: baris status (`HTTP/1.1 200 OK`), header (`Content-Length: {length}`), dan isi (konten HTML). Pemisah `\r\n` penting karena protokol HTTP membutuhkan CRLF (Carriage Return + Line Feed) sebagai akhiran baris, dan baris kosong (`\r\n\r\n`) harus memisahkan header dari isi.
 
 Terakhir, `stream.write_all(response.as_bytes())` mengkonversi string respons menjadi byte dan mengirimkannya melalui aliran TCP ke browser. Setelah perubahan ini, mengakses `http://127.0.0.1:7878` di browser sekarang menampilkan halaman HTML dengan benar dengan judul "Hello!" dan pesan khusus.
+
+## Commit 3 Reflection
+Pada milestone ini, saya menambahkan validasi request sehingga server sekarang dapat membedakan antara permintaan yang valid dan tidak valid, dan merespons sesuai dengan itu. Sebelumnya, server selalu mengembalikan `hello.html` terlepas dari URL apa pun yang diminta browser. Sekarang, hanya permintaan ke `/` yang akan menerima halaman `hello.html`, sementara URL lain akan menerima halaman `404.html` dengan status "Tidak Ditemukan".
+
+Validasi bekerja dengan hanya membaca baris pertama dari permintaan HTTP, yaitu baris permintaan (misalnya, `GET / HTTP/1.1`). Baris ini berisi metode HTTP, jalur yang diminta, dan versi HTTP. Dengan memeriksa apakah baris permintaan sama dengan `"GET / HTTP/1.1"`, server dapat menentukan apakah akan menyajikan halaman utama atau halaman kesalahan.
+
+Refactoring yang dilakukan pada milestone ini penting karena tanpa itu, kode akan memiliki dua blok yang hampir identik untuk menulis respons, satu untuk kasus 200 dan satu untuk kasus 404. Dengan mengekstrak hanya bagian yang berbeda (`status_line` dan `filename`) ke dalam sebuah tuple, logika pembuatan dan pengiriman respons sebenarnya hanya perlu ditulis sekali. Ini mengikuti prinsip DRY (Don't Repeat Yourself) dan membuat kode jauh lebih mudah dipelihara dan diperluas di masa mendatang.
+
+Saya juga membuat file `404.html` dengan pesan kesalahan khusus yang akan disajikan ketika rute yang tidak dikenal diminta. Pengujian dengan `http://127.0.0.1:7878/bad` di browser dengan benar menampilkan halaman kesalahan "Oops!", yang mengkonfirmasi bahwa validasi permintaan berfungsi seperti yang diharapkan.

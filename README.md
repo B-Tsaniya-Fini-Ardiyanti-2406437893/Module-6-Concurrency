@@ -33,3 +33,12 @@ Pada milestone ini, saya mensimulasikan request lambat dengan menambahkan route 
 Masalah server single-threaded terlihat saat mengakses `/sleep` dan `/` secara bersamaan. Request ke `/` harus menunggu hingga `/sleep` selesai, meskipun tidak memerlukan delay. Hal ini terjadi karena server hanya dapat menangani satu koneksi dalam satu waktu, sehingga request lain akan tertahan.
 
 Dalam kondisi nyata, ini membuat server tidak responsif saat menerima banyak request. Oleh karena itu, diperlukan multithreading agar setiap request dapat diproses secara paralel. Solusi ini akan diimplementasikan pada milestone berikutnya menggunakan ThreadPool.
+
+## Commit 5 Reflection
+Di milestone ini, saya membuat server jadi multithread menggunakan `ThreadPool` (4 worker), jadi sekarang server bisa handle beberapa request sekaligus tanpa saling menunggu.
+
+Cara `ThreadPool` bekerja adalah main thread mengirim job (handle request) ke worker lewat channel `mpsc`. Worker yang kosong akan mengambil dan menjalankan job tersebut. Saya memakai juga `Arc<Mutex<...>>` supaya receiver bisa diakses bersama-sama tapi tetap aman dari race condition.
+
+Saya juga menambahkan `Drop` agar shutdown-nya rapi, worker bisa menyelesaikan job dulu baru berhenti.
+
+Hasilnya, saat dites membuka `/sleep` dan `/` bersama-sama, sekarang tidak saling nge-block

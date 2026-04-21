@@ -42,3 +42,12 @@ Cara `ThreadPool` bekerja adalah main thread mengirim job (handle request) ke wo
 Saya juga menambahkan `Drop` agar shutdown-nya rapi, worker bisa menyelesaikan job dulu baru berhenti.
 
 Hasilnya, saat dites membuka `/sleep` dan `/` bersama-sama, sekarang tidak saling nge-block
+
+## Commit Bonus Reflection
+Di bonus milestone ini, saya membuat fungsi `build` sebagai pengganti `new` untuk `ThreadPool`. Perbedaannya adalah `new` memakai `assert!` sehingga langsung panic kalau input salah, sedangkan `build` return `Result` agar error bisa ditangani dengan lebih fleksibel.
+
+Ini mengikuti konvensi Rust, di mana `new` dipakai jika pasti berhasil, dan `build`/`try_new` kalau bisa gagal.
+
+Saya juga bikin custom error (`PoolCreationError`) agar pesan error lebih jelas. Di `main`, saya memakai `unwrap_or_else` supaya jika gagal, program tetap exit dengan pesan yang rapi, bukan panic.
+
+Jadi, peningkatan ini membuat `ThreadPool` lebih robust dan siap untuk production-ready. Ini adalah perubahan kecil namun penting yang mencerminkan praktik pemrograman Rust yang baik, di mana tujuannya adalah untuk membuat kesalahan eksplisit dan ditangani pada tingkat yang tepat daripada membiarkan program mogok secara tiba-tiba.

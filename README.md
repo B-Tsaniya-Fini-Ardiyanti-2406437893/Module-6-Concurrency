@@ -26,3 +26,10 @@ Validasi bekerja dengan hanya membaca baris pertama dari permintaan HTTP, yaitu 
 Refactoring yang dilakukan pada milestone ini penting karena tanpa itu, kode akan memiliki dua blok yang hampir identik untuk menulis respons, satu untuk kasus 200 dan satu untuk kasus 404. Dengan mengekstrak hanya bagian yang berbeda (`status_line` dan `filename`) ke dalam sebuah tuple, logika pembuatan dan pengiriman respons sebenarnya hanya perlu ditulis sekali. Ini mengikuti prinsip DRY (Don't Repeat Yourself) dan membuat kode jauh lebih mudah dipelihara dan diperluas di masa mendatang.
 
 Saya juga membuat file `404.html` dengan pesan kesalahan khusus yang akan disajikan ketika rute yang tidak dikenal diminta. Pengujian dengan `http://127.0.0.1:7878/bad` di browser dengan benar menampilkan halaman kesalahan "Oops!", yang mengkonfirmasi bahwa validasi permintaan berfungsi seperti yang diharapkan.
+
+## Commit 4 Reflection
+Pada milestone ini, saya mensimulasikan request lambat dengan menambahkan route `/sleep` yang membuat server menunggu selama 10 detik sebelum merespons menggunakan `thread::sleep(Duration::from_secs(10))`.
+
+Masalah server single-threaded terlihat saat mengakses `/sleep` dan `/` secara bersamaan. Request ke `/` harus menunggu hingga `/sleep` selesai, meskipun tidak memerlukan delay. Hal ini terjadi karena server hanya dapat menangani satu koneksi dalam satu waktu, sehingga request lain akan tertahan.
+
+Dalam kondisi nyata, ini membuat server tidak responsif saat menerima banyak request. Oleh karena itu, diperlukan multithreading agar setiap request dapat diproses secara paralel. Solusi ini akan diimplementasikan pada milestone berikutnya menggunakan ThreadPool.
